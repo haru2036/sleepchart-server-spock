@@ -1,0 +1,51 @@
+name:                sleepchart-server-spock
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            https://github.com/githubuser/sleepchart-server-spock#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Haruka Nakajima
+maintainer:          haru2036@gmail.com
+copyright:           2016 Haruka Nakajima
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+executable sleepchart-server-spock
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , Spock >= 0.11
+                     , mtl
+                     , text
+                     , time
+                     , persistent
+                     , safe
+                     , sleepchart-server-spock
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Model
+                     , Config
+  build-depends:       base >= 4.7 && < 5
+                     , aeson
+                     , mtl
+                     , time
+                     , persistent
+                     , scotty
+                     , wai
+                     , persistent
+                     , persistent-postgresql
+                     , persistent-template
+                     , persistent-sqlite
+                     , monad-logger
+                     , transformers
+                     , bytestring
+                     , wai-extra
+                     , safe
+                     , resourcet
+                     , monad-logger
+  default-language:    Haskell2010
