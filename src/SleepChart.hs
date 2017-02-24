@@ -71,8 +71,6 @@ app =
           now <- runSQL $ insert $ SleepSession now now 
           list <- runSQL $ selectList [] [P.Asc SleepSessionStart]
           json list
-       prehook authHook $ 
-               do get "/logout" $ text "logout stub!"
 
 baseHook :: AppAction () (HVect '[])
 baseHook = return HNil
