@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
+{-# LANGUAGE OverloadedStrings, QuasiQuotes, TypeOperators, DataKinds,GADTs #-}
 module SleepChart where
 
 import Web.Spock
@@ -6,7 +6,10 @@ import Web.Spock.Config
 import           Data.Aeson (Value(..), object, (.=))
 import           Network.Wai (Application)
 import           Model
+import           Model.ResponseTypes
+import           Text.Blaze.Html (Html, toHtml)
 import           Database.Persist.Sqlite(runSqlPool, insert, selectList, Entity, SelectOpt(..))
+import           Network.Wai.Middleware.Static
 import           Config
 import           Safe                        (readMay)
 import           Data.Time
@@ -16,12 +19,22 @@ import Data.IORef
 import Control.Monad.IO.Class (liftIO)
 import qualified Web.Scotty as S
 import qualified Data.Text as T
-import qualified Database.Persist.Sql as P
+import           Database.Persist.Sql         hiding(get)
+import qualified Database.Persist.Sqlite as P hiding(get)
 import           System.Environment          (lookupEnv)
 import           Safe                        (readMay)
+import           Data.HVect
+import           Control.Monad.Reader.Class
+import           Control.Monad.Logger
+import           Control.Monad.Trans.Resource
+import qualified Network.HTTP.Types.Status as Http
 
-data MySession = EmptySession
-data MyAppState = DummyAppState (IORef Int)
+
+data MySession = Maybe SessionId 
+data AppState = DummyAppState (IORef Int)
+type SessionVal = Maybe SessionId
+type AppAction ctx a = SpockActionCtx ctx P.SqlBackend SessionVal AppState a
+type App ctx a = SpockCtxM ctx P.SqlBackend SessionVal AppState a
 
 lookupSetting :: Read a => String -> a -> IO a
 lookupSetting env def = do
@@ -40,10 +53,12 @@ lookupSetting env def = do
         , env
         ]
 
-app :: SpockM () MySession MyAppState ()
-app =
-    do get root $
-           text "Hello World!"
+app :: App () ()
+app = 
+  prehook baseHook $ 
+    do middleware (staticPolicy (addBase "static"))
+       get root $
+             text "Hello World!"
        get ("hello" <//> var) $ \name ->
            do (DummyAppState ref) <- getState
               visitorNumber <- liftIO $ atomicModifyIORef' ref $ \i -> (i+1, i+1)
@@ -53,7 +68,19 @@ app =
           json $ SleepSession now now 
        get "some-db" $ do
           now <- liftIO getCurrentTime
-          liftIO $ runDb $ P.insert $ SleepSession now now 
-          list <- liftIO $ runDb $ P.selectList [] [P.Asc SleepSessionStart]
+          now <- runSQL $ insert $ SleepSession now now 
+          list <- runSQL $ selectList [] [P.Asc SleepSessionStart]
           json list
+       prehook authHook $ 
+               do get "/logout" $ text "logout stub!"
+
+baseHook :: AppAction () (HVect '[])
+baseHook = return HNil
+
+-- from funBlog
+runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) => SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a
+runSQL action =
+      runQuery $ \conn ->
+              runResourceT $ runNoLoggingT $ runSqlConn action conn
+{-# INLINE runSQL #-}
 

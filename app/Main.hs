@@ -9,13 +9,16 @@ import Model
 import Control.Monad.Trans
 import Data.Monoid
 import Data.IORef
-import           Data.Time
+import Data.Time
+import Control.Monad.Logger
+import Database.Persist.Sqlite
 
 
 main :: IO ()
 main =
     do ref <- newIORef 0
-       spockCfg <- defaultSpockCfg EmptySession PCNoDatabase (DummyAppState ref)
-       doMigrations
+       pool <- runNoLoggingT $ createSqlitePool ("test.sqlite3") 5
+       runNoLoggingT $ runSqlPool (runMigration migrateAll) pool
+       spockCfg <- defaultSpockCfg Nothing (PCPool pool) (DummyAppState ref)
        runSpock 8080 (spock spockCfg app)
 

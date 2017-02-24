@@ -46,8 +46,3 @@ SleepInDay json
 
 |]
 
-doMigrations :: IO ()
-doMigrations = runDb $ runMigration migrateAll
-
-runDb :: SqlPersist (ResourceT (NoLoggingT IO)) a -> IO a
-runDb query = runNoLoggingT . runResourceT . withSqliteConn "dev.sqlite3" . runSqlConn $ query
