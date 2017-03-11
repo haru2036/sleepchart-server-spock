@@ -41,6 +41,8 @@ SleepSession json
 
 SleepingSession json
     start UTCTime
+    user User
+    UniqueSleepingSession user
     deriving Show
 
 SleepInDay json

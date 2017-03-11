@@ -59,4 +59,5 @@ library
                      , hvect
                      , http-types
                      , blaze-html
+                     , data-default
   default-language:    Haskell2010
