@@ -39,6 +39,10 @@ SleepSession json
     end UTCTime 
     deriving Show
 
+SleepingSession json
+    start UTCTime
+    deriving Show
+
 SleepInDay json
     date Day
     sleeps [SleepSession]
