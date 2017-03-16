@@ -65,12 +65,12 @@ app =
               visitorNumber <- liftIO $ atomicModifyIORef' ref $ \i -> (i+1, i+1)
               text ("Hello " <> name <> ", you are visitor number " <> T.pack (show visitorNumber))
 
-       get "/sleep/start" $ do
+       post "/sleep/start" $ do
          now <- liftIO getCurrentTime
          sleepingSession <- runSQL $ insert $ SleepingSession now $ dummyUser
          json sleepingSession
 
-       get "/sleep/stop" $ do
+       post "/sleep/stop" $ do
          mSleeping <- runSQL $ P.getBy $ UniqueSleepingSession dummyUser 
          case mSleeping of
            Just sleeping -> do
@@ -87,7 +87,6 @@ app =
 
        get "some-db" $ do
          now <- liftIO getCurrentTime
-         now <- runSQL $ insert $ SleepSession now now 
          list <- runSQL $ selectList [] [P.Asc SleepSessionStart]
          json list
 
