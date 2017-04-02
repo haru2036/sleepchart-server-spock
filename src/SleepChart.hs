@@ -77,13 +77,9 @@ app =
              now <- liftIO getCurrentTime
              sleepSession <- runSQL $ do
                P.delete $ entityKey sleeping
-               insert $ SleepSession now $ sleepingSessionStart $ entityVal sleeping
+               insert $ SleepSession now (sleepingSessionStart $ entityVal sleeping) (userEmail $ sleepingSessionUser $ entityVal sleeping)
              json sleepSession
            Nothing -> undefined
-
-       get "some-json" $ do
-         now <- liftIO getCurrentTime
-         json $ SleepSession now now 
 
        get "some-db" $ do
          now <- liftIO getCurrentTime
@@ -91,6 +87,7 @@ app =
          json list
 
 dummyUser = (User "hogehoge" "hoge@hoge.com")
+
 baseHook :: AppAction () (HVect '[])
 baseHook = return HNil
 

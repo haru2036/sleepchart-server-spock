@@ -32,14 +32,16 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
     name String
     email String
+    UniqueUser email
     deriving Show
 
 SleepSession json
     start UTCTime
     end UTCTime 
+    userId String
     deriving Show
 
-SleepingSession json
+SleepingSession 
     start UTCTime
     user User
     UniqueSleepingSession user
