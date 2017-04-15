@@ -34,6 +34,11 @@ User json
     email String
     deriving Show
 
+Session
+    validUntil UTCTime
+    userId UserId 
+    deriving Show
+
 SleepSession json
     start UTCTime
     end UTCTime 

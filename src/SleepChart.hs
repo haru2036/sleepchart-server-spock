@@ -3,14 +3,15 @@ module SleepChart where
 
 import Web.Spock
 import Web.Spock.Config
+import Type
+import Action
 import qualified Web.Scotty as S
 import           Data.Default
 import           Data.Aeson (Value(..), object, (.=))
 import           Network.Wai (Application)
-import           Model
+import           Model hiding(SessionId)
 import           Model.ResponseTypes
 import           Text.Blaze.Html (Html, toHtml)
-import           Database.Persist.Sqlite(runSqlPool, insert, selectList, Entity, SelectOpt(..))
 import           Network.Wai.Middleware.Static
 import           Config
 import           Safe                        (readMay)
@@ -21,22 +22,13 @@ import Data.IORef
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.Text as T
 import           Database.Persist.Sql         hiding(get)
-import qualified Database.Persist.Sqlite as PS hiding(get)
 import qualified Database.Persist as P 
 import           System.Environment          (lookupEnv)
 import           Safe                        (readMay)
 import           Data.HVect
 import           Control.Monad.Reader.Class
-import           Control.Monad.Logger
-import           Control.Monad.Trans.Resource
 import qualified Network.HTTP.Types.Status as Http
 
-
-data MySession = Maybe SessionId 
-data AppState = DummyAppState (IORef Int)
-type SessionVal = Maybe SessionId
-type AppAction ctx a = SpockActionCtx ctx PS.SqlBackend SessionVal AppState a
-type App ctx a = SpockCtxM ctx PS.SqlBackend SessionVal AppState a
 
 lookupSetting :: Read a => String -> a -> IO a
 lookupSetting env def = do
@@ -79,25 +71,19 @@ app =
                P.delete $ entityKey sleeping
                insert $ SleepSession now $ sleepingSessionStart $ entityVal sleeping
              json sleepSession
-           Nothing -> undefined
+           Nothing -> setStatus Http.notFound404
 
        get "some-json" $ do
          now <- liftIO getCurrentTime
          json $ SleepSession now now 
 
-       get "some-db" $ do
+       get "sleeps" $ do
          now <- liftIO getCurrentTime
          list <- runSQL $ selectList [] [P.Asc SleepSessionStart]
          json list
 
-dummyUser = (User "hogehoge" "hoge@hoge.com")
+dummyUser = User "hogehoge" "hoge@hoge.com"
+
 baseHook :: AppAction () (HVect '[])
 baseHook = return HNil
-
--- from funBlog
-runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) => SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a
-runSQL action =
-      runQuery $ \conn ->
-              runResourceT $ runNoLoggingT $ runSqlConn action conn
-{-# INLINE runSQL #-}
 
