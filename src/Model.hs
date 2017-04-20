@@ -25,13 +25,27 @@ import           Control.Monad.Trans.Resource
 import           Control.Monad.Logger
 import           GHC.Generics         (Generic)
 import           Config
+import qualified Data.Text as T
+
+import Data.Aeson.TH
+
+dropLbl :: Int -> Options
+dropLbl i =
+      defaultOptions { fieldLabelModifier = drop i }
+
+data CommonResponse = CommonError T.Text
+                    | CommonSuccess T.Text
+                    deriving (Show, Eq)
 
 
+$(deriveJSON defaultOptions ''CommonResponse)
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
-    name String
-    email String
+    name T.Text
+    email T.Text
+    password T.Text
+    salt T.Text
     deriving Show
 
 Session

@@ -82,7 +82,7 @@ app =
          list <- runSQL $ selectList [] [P.Asc SleepSessionStart]
          json list
 
-dummyUser = User "hogehoge" "hoge@hoge.com"
+dummyUser = User "hogehoge" "hoge@hoge.com" "hoge" "hoge"
 
 baseHook :: AppAction () (HVect '[])
 baseHook = return HNil
