@@ -36,6 +36,7 @@ library
                      , SleepChart
                      , Action
                      , Type
+                     , Utils
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , mtl
@@ -62,4 +63,8 @@ library
                      , http-types
                      , blaze-html
                      , data-default
+                     , cryptonite
+                     , random
+                     , base16-bytestring
+                     , word8
   default-language:    Haskell2010

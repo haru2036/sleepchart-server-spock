@@ -46,6 +46,8 @@ User json
     email T.Text
     password T.Text
     salt T.Text
+    UniqueUsername name
+    UniqueEmail email
     deriving Show
 
 Session

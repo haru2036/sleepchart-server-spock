@@ -5,6 +5,7 @@ import Web.Spock
 import Web.Spock.Config
 import Type
 import Action
+import Utils
 import qualified Web.Scotty as S
 import           Data.Default
 import           Data.Aeson (Value(..), object, (.=))
@@ -46,6 +47,7 @@ lookupSetting env def = do
         , "]] for environment variable "
         , env
         ]
+
 app :: App () ()
 app = 
   prehook baseHook $ 
