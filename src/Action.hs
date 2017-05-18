@@ -16,6 +16,7 @@ import Data.Word8
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BSC8
 import Data.Time.Clock
 import qualified Crypto.Hash as Hash
 import System.Random
@@ -47,7 +48,7 @@ guestOnlyHook = maybeUser $ \mUser ->
 
 hashPassword :: T.Text -> BS.ByteString -> BS.ByteString
 hashPassword password salt =
-       read $ show $ Hash.hashFinalize $ Hash.hashUpdates (Hash.hashInitWith Hash.SHA3_512) [salt, T.encodeUtf8 $ password]
+       BSC8.pack $ show $ Hash.hashFinalize $ Hash.hashUpdates (Hash.hashInitWith Hash.SHA3_512) [salt, T.encodeUtf8 $ password]
 
 registerUser :: T.Text -> T.Text -> T.Text -> SqlPersistM CommonResponse
 registerUser name email password = do

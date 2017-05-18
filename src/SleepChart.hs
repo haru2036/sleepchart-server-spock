@@ -83,6 +83,13 @@ app =
          now <- liftIO getCurrentTime
          list <- runSQL $ selectList [] [P.Asc SleepSessionStart]
          json list
+       post "/accounts/register" $ do
+         mReqBody <- jsonBody
+         case mReqBody of
+           Just reqBody -> do
+             result <- runSQL $ registerUser (name reqBody) (email reqBody) (password reqBody) 
+             json result
+           Nothing -> json $ CommonError "invalid request"
 
 dummyUser = User "hogehoge" "hoge@hoge.com" "hoge" "hoge"
 

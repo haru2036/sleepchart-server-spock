@@ -29,16 +29,14 @@ import qualified Data.Text as T
 
 import Data.Aeson.TH
 
-dropLbl :: Int -> Options
-dropLbl i =
-      defaultOptions { fieldLabelModifier = drop i }
-
-data CommonResponse = CommonError T.Text
-                    | CommonSuccess T.Text
-                    deriving (Show, Eq)
+data SignupRequest = SignupRequest { name :: T.Text,
+                                     email :: T.Text,
+                                     password :: T.Text
+                                     }
 
 
-$(deriveJSON defaultOptions ''CommonResponse)
+
+$(deriveJSON defaultOptions ''SignupRequest)
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
