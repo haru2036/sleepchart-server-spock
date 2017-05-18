@@ -7,6 +7,7 @@ module Action where
 
 import Type
 import Model 
+import Model.ResponseTypes
 import Utils
 import Web.Spock hiding (get, SessionId)
 import Data.HVect
@@ -33,7 +34,6 @@ randomBytes 0 _ = []
 randomBytes ct g =
       let (value, nextG) = next g
       in fromIntegral value:randomBytes (ct - 1) nextG
-    
 
 randomBS :: Int -> StdGen -> BS.ByteString
 randomBS len g = BS.pack $ randomBytes len g
@@ -67,7 +67,14 @@ registerUser name email password = do
 
 
 loginUser :: T.Text -> T.Text -> SqlPersistM (Maybe UserId)
-loginUser = undefined
+loginUser email password = do
+  mUserEmail <- getBy $ UniqueEmail email
+  case mUserEmail of
+    Just entity -> do
+      let user = entityVal entity
+      return $ if userPassword user == (read $ show $ hashPassword password $ read $ show $ userSalt user) then Just $ entityKey entity
+      else Nothing
+    Nothing -> return Nothing
 
 createSession :: UserId -> SqlPersistM SessionId
 createSession userId = do
