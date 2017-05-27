@@ -97,14 +97,14 @@ app =
        post "/accounts/login" $ do
          mReqBody <- jsonBody
          result <- runSQL $ runMaybeT $ login mReqBody
-         setStatus $ fromMaybe Http.unauthorized401 $ join result
+         setStatus $ fromMaybe Http.unauthorized401 result
 
-login :: Maybe LoginRequest -> MaybeT SqlPersistM (Maybe Http.Status) 
+login :: Maybe LoginRequest -> MaybeT SqlPersistM Http.Status 
 login (Just loginRequest) = do
      user <- MaybeT $ loginUser (lEmail loginRequest) (lPassword loginRequest) 
      _ <- lift $ createSession user 
-     return $ Just Http.ok200
-login Nothing = MaybeT $ return Nothing
+     return Http.ok200
+login Nothing = MaybeT $ pure Nothing
   
 dummyUser = User "hogehoge" "hoge@hoge.com" "hoge" "hoge"
 
