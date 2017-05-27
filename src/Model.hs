@@ -29,14 +29,18 @@ import qualified Data.Text as T
 
 import Data.Aeson.TH
 
-data SignupRequest = SignupRequest { name :: T.Text,
-                                     email :: T.Text,
-                                     password :: T.Text
+data SignupRequest = SignupRequest { sName :: T.Text,
+                                     sEmail :: T.Text,
+                                     sPassword :: T.Text
+                                     }
+
+data LoginRequest = LoginRequest   { lEmail :: T.Text,
+                                     lPassword :: T.Text
                                      }
 
 
-
 $(deriveJSON defaultOptions ''SignupRequest)
+$(deriveJSON defaultOptions ''LoginRequest)
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
