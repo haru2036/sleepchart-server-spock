@@ -28,6 +28,8 @@ import           System.Environment          (lookupEnv)
 import           Safe                        (readMay)
 import           Data.HVect
 import           Control.Monad.Reader.Class
+import           Control.Monad.Trans.Maybe
+import           Control.Monad.Trans
 import qualified Network.HTTP.Types.Status as Http
 
 
@@ -90,6 +92,16 @@ app =
              result <- runSQL $ registerUser (name reqBody) (email reqBody) (password reqBody) 
              json result
            Nothing -> json $ CommonError "invalid request"
+       post "/accounts/login" $ do
+         mReqBody <- jsonBody
+         status <- case mReqBody of
+           Just reqBody -> runSQL $ do
+             mUser <- loginUser (email reqBody) (password reqBody) 
+             case mUser of
+               Just user -> createSession user >> return Http.ok200 
+               Nothing -> return Http.status401 
+           Nothing -> return Http.status401 
+         setStatus status
 
 dummyUser = User "hogehoge" "hoge@hoge.com" "hoge" "hoge"
 
